@@ -17,7 +17,6 @@ public class Film {
 
     public static final String FIRST_FILM_DATE = "1895-12-28";
 
-    @PositiveOrZero(message = "Идентификатор должен быть положительным числом или равняться нулю.")
     private long id;
 
     @NotBlank(message = "Название должно содержать как минимум один непустой символ и не может быть null")
