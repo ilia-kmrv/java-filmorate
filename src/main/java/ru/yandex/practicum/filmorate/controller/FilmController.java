@@ -38,13 +38,13 @@ public class FilmController {
 
     @PutMapping
     public Film putFilm(@Valid @RequestBody Film film) {
-            if (films.containsKey(film.getId())) {
-                films.put(film.getId(), film);
-                log.info("Обработан PUT-запрос. Фильм {} с id={} успешно обновлён", film.getName(), film.getId());
-            } else {
-                throw new ResourceNotFoundException("Фильм с таким id не найден");
-            }
-            return film;
+        if (films.containsKey(film.getId())) {
+            films.put(film.getId(), film);
+            log.info("Обработан PUT-запрос. Фильм {} с id={} успешно обновлён", film.getName(), film.getId());
+        } else {
+            throw new ResourceNotFoundException("Фильм с таким id не найден");
+        }
+        return film;
     }
 
 }

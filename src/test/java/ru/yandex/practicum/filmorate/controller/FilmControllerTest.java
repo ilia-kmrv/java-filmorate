@@ -57,7 +57,7 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Описание фильма должно быть меньше или равно 200 символов")
-    void postFilmDescriptionWithMoreThan200symbolsShouldFailValidation(){
+    void postFilmDescriptionWithMoreThan200symbolsShouldFailValidation() {
         char[] chars = new char[200];
         Arrays.fill(chars, '1');
         String description = new String(chars);
@@ -94,7 +94,7 @@ class FilmControllerTest {
     //TODO: check duration is positive
     @Test
     @DisplayName("Проверка продолжительности - только положительное число")
-    void postFilmWithNegativeDurationShouldFailValidation(){
+    void postFilmWithNegativeDurationShouldFailValidation() {
         film.setDuration(0);
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertFalse(violations.isEmpty(), "Добавлена продолжительность co значением 0");

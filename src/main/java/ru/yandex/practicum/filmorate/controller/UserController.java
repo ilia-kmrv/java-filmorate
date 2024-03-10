@@ -19,19 +19,19 @@ public class UserController {
 
     private long idCounter;
 
-    private long generateId(){
+    private long generateId() {
         return ++idCounter;
     }
 
     @GetMapping
-    public Collection<User> getAllUsers(){
+    public Collection<User> getAllUsers() {
         return users.values();
     }
 
     @PostMapping
     public User postUser(@Valid @RequestBody User user) {
         user.setId(generateId());
-        if (user.getName() == null || user.getName().isBlank()){
+        if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
         users.put(user.getId(), user);
@@ -42,7 +42,7 @@ public class UserController {
     @PutMapping
     public User putUser(@Valid @RequestBody User user) {
         if (users.containsKey(user.getId())) {
-            if (user.getName() == null || user.getName().isBlank()){
+            if (user.getName() == null || user.getName().isBlank()) {
                 user.setName(user.getLogin());
             }
             users.put(user.getId(), user);
