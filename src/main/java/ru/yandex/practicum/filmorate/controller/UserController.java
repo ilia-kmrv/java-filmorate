@@ -29,7 +29,7 @@ public class UserController {
     }
 
     @PostMapping
-    public User postUser(@Valid @RequestBody User user){
+    public User postUser(@Valid @RequestBody User user) {
         user.setId(generateId());
         if (user.getName() == null || user.getName().isBlank()){
             user.setName(user.getLogin());

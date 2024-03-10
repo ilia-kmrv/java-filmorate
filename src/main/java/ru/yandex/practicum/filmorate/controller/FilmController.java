@@ -19,17 +19,17 @@ public class FilmController {
     private long idCounter;
 
     // генератор id
-    private long generateId(){
+    private long generateId() {
         return ++idCounter;
     }
 
     @GetMapping
-    public Collection<Film> getAllFilms(){
+    public Collection<Film> getAllFilms() {
         return films.values();
     }
 
     @PostMapping
-    public Film postFilm(@Valid @RequestBody Film film){
+    public Film postFilm(@Valid @RequestBody Film film) {
         film.setId(generateId());
         films.put(film.getId(), film);
         log.info("Обработан POST запрос. Фильм {} с id={} успешно добавлен", film.getName(), film.getId());
