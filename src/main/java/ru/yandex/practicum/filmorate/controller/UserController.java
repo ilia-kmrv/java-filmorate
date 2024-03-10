@@ -6,7 +6,6 @@ import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +40,7 @@ public class UserController {
     }
 
     @PutMapping
-    public User putUser(@Valid @RequestBody @NotNull User user) {
+    public User putUser(@Valid @RequestBody User user) {
         if (users.containsKey(user.getId())) {
             if (user.getName() == null || user.getName().isBlank()){
                 user.setName(user.getLogin());

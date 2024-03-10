@@ -18,7 +18,7 @@ public class AfterDateValidator implements ConstraintValidator<AfterDate, LocalD
     public boolean isValid(LocalDate value, ConstraintValidatorContext context) {
         boolean valid = true;
         if (value != null) {
-            if (!value.isAfter(date)) {
+            if (!value.isAfter(date) && !value.isEqual(date)) {
                 valid = false;
             }
         }

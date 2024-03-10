@@ -28,7 +28,6 @@ public class Film {
 
     @NotNull
     @AfterDate(FIRST_FILM_DATE)
-    @PastOrPresent
     private LocalDate releaseDate;
 
     @Positive
