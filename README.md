@@ -1,2 +1,2 @@
 # java-filmorate
-Template repository for Filmorate project.
+Проект по выставлению рейтингов фильмам.
