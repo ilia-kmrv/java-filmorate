@@ -31,9 +31,7 @@ public class UserController {
     @PostMapping
     public User postUser(@Valid @RequestBody User user) {
         user.setId(generateId());
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
+        setUserNameToLoginIfNotProvided(user);
         users.put(user.getId(), user);
         log.info("Обработан POST запрос. Пользователь {} с id={} успешно добавлен", user.getName(), user.getId());
         return user;
@@ -42,15 +40,21 @@ public class UserController {
     @PutMapping
     public User putUser(@Valid @RequestBody User user) {
         if (users.containsKey(user.getId())) {
-            if (user.getName() == null || user.getName().isBlank()) {
-                user.setName(user.getLogin());
-            }
+            setUserNameToLoginIfNotProvided(user);
             users.put(user.getId(), user);
             log.info("Обработан PUT-запрос. Пользователь {} с id={} успешно обновлён", user.getName(), user.getId());
         } else {
             throw new ResourceNotFoundException("Пользователь с таким id не найден");
         }
         return user;
+    }
+
+    // если явно не указано имя пользователя присваевает значения логина
+    private void setUserNameToLoginIfNotProvided(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+            log.info("В имя пользователя с id={} записан логин {}", user.getId(), user.getLogin());
+        }
     }
 
 }
