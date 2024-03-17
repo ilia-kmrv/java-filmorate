@@ -1,60 +1,44 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/users")
 public class UserController {
 
-    private final Map<Long, User> users = new HashMap<>();
-
-    private long idCounter;
-
-    private long generateId() {
-        return ++idCounter;
-    }
+    private final UserService userService;
 
     @GetMapping
     public Collection<User> getAllUsers() {
-        return users.values();
+        return userService.getAllUsers();
     }
 
     @PostMapping
     public User postUser(@Valid @RequestBody User user) {
-        user.setId(generateId());
-        setUserNameToLoginIfNotProvided(user);
-        users.put(user.getId(), user);
-        log.info("Обработан POST запрос. Пользователь {} с id={} успешно добавлен", user.getName(), user.getId());
+        userService.addUser(user);
+        log.info("Обработан POST user запрос.");
         return user;
     }
 
     @PutMapping
     public User putUser(@Valid @RequestBody User user) {
-        if (users.containsKey(user.getId())) {
-            setUserNameToLoginIfNotProvided(user);
-            users.put(user.getId(), user);
-            log.info("Обработан PUT-запрос. Пользователь {} с id={} успешно обновлён", user.getName(), user.getId());
-        } else {
-            throw new ResourceNotFoundException("Пользователь с таким id не найден");
+        try {
+            userService.updateUser(user);
+            log.info("Обработан PUT user запрос.");
+        } catch (ResourceNotFoundException e){
+            throw new ResourceNotFoundException(e.getMessage());
         }
         return user;
-    }
-
-    // если явно не указано имя пользователя присваевает значения логина
-    private void setUserNameToLoginIfNotProvided(User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-            log.info("В имя пользователя с id={} записан логин {}", user.getId(), user.getLogin());
-        }
     }
 
 }
