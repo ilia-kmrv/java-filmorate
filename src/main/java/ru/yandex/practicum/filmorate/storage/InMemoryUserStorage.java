@@ -40,11 +40,11 @@ public class InMemoryUserStorage implements UserStorage {
             users.remove(userId);
             log.info("Пользователь {} c id={} успешно удалён", users.get(userId).getLogin(), userId);
         } else {
-            throw new ResourceNotFoundException("Пользователь с таким id не найден");
+            throw new ResourceNotFoundException(String.format("Пользователь с id=%d не найден", userId));
         }
     }
 
-    // TODO: implement updating a user in storagemethod
+    // TODO: implement updating a user in storage method
     @Override
     public User updateUser(User user) {
         if (users.containsKey(user.getId())) {
@@ -52,7 +52,7 @@ public class InMemoryUserStorage implements UserStorage {
             users.put(user.getId(), user);
             log.info("Пользователь {} с id={} успешно обновлён", user.getLogin(), user.getId());
         } else {
-            throw new ResourceNotFoundException("Пользователь с таким id не найден");
+            throw new ResourceNotFoundException(String.format("Пользователь с id=%d не найден", user.getId()));
         }
         return user;
     }
@@ -60,6 +60,17 @@ public class InMemoryUserStorage implements UserStorage {
     // TODO: method to get list of users
     public List<User> getAllUsers() {
         return users.values().stream().collect(Collectors.toList());
+    }
+
+    @Override
+    public User getUserById(Long id) {
+        if (users.containsKey(id)) {
+            log.info("Пользователь с id={} найден", id);
+            return users.get(id);
+        } else {
+            log.warn("Пользователь с id={} не найден", id);
+            throw new ResourceNotFoundException(String.format("Пользователь с id=%d не найден", id));
+        }
     }
 
     // если явно не указано имя пользователя присваивает значения логина

@@ -15,5 +15,9 @@ public interface UserStorage {
     // обновление пользователя
     User updateUser(User user);
 
+    // получение всех пользователей
     List<User> getAllUsers();
+
+    // получение пользователя по id
+    User getUserById(Long id);
 }

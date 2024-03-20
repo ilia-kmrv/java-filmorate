@@ -16,4 +16,7 @@ public interface FilmStorage {
 
     // получение списка фильмов
     List<Film> getAllFilms();
+
+    // получение фильма по id
+    Film getFilmById(Long id);
 }
