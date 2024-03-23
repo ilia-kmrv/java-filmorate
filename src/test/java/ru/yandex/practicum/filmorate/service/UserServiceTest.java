@@ -67,7 +67,7 @@ class UserServiceTest {
     void addFriendShouldThrowExceptionIfIdNotFound() {
         userService.addFriend(user.getId(), friend.getId());
 
-        assertEquals(user.getFriends(), userStorage.getUserById(user.getId()).getFriends());
+        assertEquals(user.getFriends(), userService.getUserById(user.getId()).getFriends());
 
         user.setId(Long.MAX_VALUE);
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
@@ -96,5 +96,16 @@ class UserServiceTest {
         List<Long> expectedList = Collections.singletonList(friend.getId());
 
         assertEquals(expectedList, userService.getAllFriends(user.getId()), "Списки друзей не совпали");
+    }
+
+    @Test
+    @DisplayName("Проверка получения пользователя по id")
+    void getUserByIdTestShouldReturnUserOrThrowException() {
+        assertTrue(user.equals(userService.getUserById(user.getId())), "Пользователи не совпали");
+
+        ResourceNotFoundException e = assertThrows(ResourceNotFoundException.class,
+                () -> userService.getUserById(Long.MAX_VALUE));
+
+        assertTrue(String.format("Пользователь с id=%d не найден", Long.MAX_VALUE).equals(e.getMessage()));
     }
 }

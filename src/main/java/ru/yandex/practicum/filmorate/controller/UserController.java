@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.Collection;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -20,6 +21,7 @@ public class UserController {
 
     @GetMapping
     public Collection<User> getAllUsers() {
+        log.info("Обработан GET users запрос");
         return userService.getAllUsers();
     }
 
@@ -39,6 +41,12 @@ public class UserController {
             throw new ResourceNotFoundException(e.getMessage());
         }
         return user;
+    }
+
+    @GetMapping("/{userId}")
+    public User getUserById(@PathVariable long userId) {
+        log.info("Обработан GET user запрос.");
+        return userService.getUserById(userId);
     }
 
 }

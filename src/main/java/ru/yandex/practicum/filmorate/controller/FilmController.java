@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import java.util.Collection;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -38,6 +39,12 @@ public class FilmController {
             throw new ResourceNotFoundException(e.getMessage());
         }
         return film;
+    }
+
+    @GetMapping("/{filmId}")
+    public Optional<Film> getFilmById(@PathVariable long filmId) {
+        log.info("Обработан GET film запрос.");
+        return Optional.ofNullable(filmService.getFilmById(filmId));
     }
 
 }

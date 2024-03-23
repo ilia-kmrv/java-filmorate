@@ -5,6 +5,7 @@ import org.jeasy.random.EasyRandomParameters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.Storages;
@@ -88,7 +89,7 @@ class FilmServiceTest {
     @Test
     @DisplayName("Проверка списка топ фильмов по лайкам")
     void getTopFilmsTestShouldReturnReverseOrderedFilmList() {
-        int filmsCount = 6;
+        int filmsCount = 15;
 
         filmService.deleteFilm(film.getId());
 
@@ -104,7 +105,22 @@ class FilmServiceTest {
 
         filmService.getTopFilms(filmsCount).stream().forEach(System.out::println);
 
-        assertTrue(expectedList.equals(filmService.getTopFilms(filmsCount)));
+        assertTrue(expectedList.equals(filmService.getTopFilms(filmsCount)), "Топ фильмов не совпадает");
 
+        assertEquals(FilmService.DEFAULT_TOP_COUNT, filmService.getTopFilms(-2).size(),
+                String.format("Кол-во фильмов в топе не %d", FilmService.DEFAULT_TOP_COUNT));
+
+    }
+
+    @Test
+    @DisplayName("Проверка получения фильма по id")
+    void getFilmByIdTestShouldReturnUserOrThrowException() {
+        assertTrue(film.equals(filmService.getFilmById(film.getId())), "Фильмы не совпали");
+
+        // проверка не существующим id
+        ResourceNotFoundException e = assertThrows(ResourceNotFoundException.class,
+                () -> filmService.getFilmById(Long.MAX_VALUE));
+
+        assertTrue(String.format("Фильм с id=%d не найден", Long.MAX_VALUE).equals(e.getMessage()));
     }
 }

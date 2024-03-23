@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 public class FilmService {
 
     private final FilmStorage filmStorage;
+    static final int DEFAULT_TOP_COUNT = 10;
 
     // TODO: add comments
     public Film addFilm(Film film) {
@@ -37,35 +39,31 @@ public class FilmService {
     }
 
     public Film addLike(Long filmId, Long userId) {
-        Film film = filmStorage.getFilmById(filmId); // TODO: check should be in the controller?
-        if (filmStorage.getAllFilms().contains(film)) {
+        Film film = getFilmById(filmId);
             film.getLikes().add(userId);
             log.info("Лайк фильму c id={} от пользователя с id={} успешно добавлен.", filmId, userId);
-        } else {
-            throw new ResourceNotFoundException(String.format("Фильм с id=%d не найден.", filmId));
-        }
         return film;
     }
 
     public Film deleteLike(Long filmId, Long userId) {
-        Film film = filmStorage.getFilmById(filmId); // TODO: check should be in the controller?
-        if (filmStorage.getAllFilms().contains(film)) {
+        Film film = getFilmById(filmId);
             film.getLikes().remove(userId);
             log.info("Лайк фильму c id={} от пользователя с id={} успешно удалён.", filmId, userId);
-        } else {
-            throw new ResourceNotFoundException(String.format("Фильм с id=%d не найден.", filmId));
-        }
         return film;
     }
 
-    // TODO: get 10 films with most likes
     public List<Film> getTopFilms(int filmsCount) {
 
         List<Film> list = filmStorage.getAllFilms().stream()
                 .sorted(Comparator.comparingInt((Film f) -> f.getLikes().size()).reversed())
-                .limit(filmsCount > 0 ? filmsCount : 10)
+                .limit(filmsCount > 0 ? filmsCount : DEFAULT_TOP_COUNT)
                 .collect(Collectors.toList());
 
         return list;
+    }
+
+    public Film getFilmById(long id) {
+        return filmStorage.getFilmById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Фильм с id=%d не найден", id)));
     }
 }

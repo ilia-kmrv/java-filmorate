@@ -5,9 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -63,14 +61,8 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getUserById(Long id) {
-        if (users.containsKey(id)) {
-            log.info("Пользователь с id={} найден", id);
-            return users.get(id);
-        } else {
-            log.warn("Пользователь с id={} не найден", id);
-            throw new ResourceNotFoundException(String.format("Пользователь с id=%d не найден", id));
-        }
+    public Optional<User> getUserById(Long id) {
+        return Optional.ofNullable(users.get(id));
     }
 
     // если явно не указано имя пользователя присваивает значения логина
