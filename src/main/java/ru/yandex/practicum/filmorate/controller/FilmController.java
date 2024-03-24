@@ -9,7 +9,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.Optional;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -35,16 +35,40 @@ public class FilmController {
         try {
             filmService.updateFilm(film);
             log.info("Обработан PUT film запрос.");
-        } catch (ResourceNotFoundException e){
+        } catch (ResourceNotFoundException e) {
             throw new ResourceNotFoundException(e.getMessage());
         }
         return film;
     }
 
     @GetMapping("/{filmId}")
-    public Optional<Film> getFilmById(@PathVariable long filmId) {
-        log.info("Обработан GET film запрос.");
-        return Optional.ofNullable(filmService.getFilmById(filmId));
+    public Film getFilmById(@PathVariable long filmId) {
+        log.info("Обработан GET film {} запрос.", filmId);
+        return filmService.getFilmById(filmId);
+    }
+
+    @DeleteMapping("/{filmId}")
+    public void deleteFilm(@PathVariable long filmId) {
+        log.info("Обработан DELETE film {} запрос.", filmId);
+        filmService.deleteFilm(filmId);
+    }
+
+    @PutMapping("/{filmId}/like/{userId}")
+    public Film addLike(@PathVariable long filmId, @PathVariable long userId) {
+        log.info("Обработан PUT film {} like запрос.", filmId);
+        return filmService.addLike(filmId, userId);
+    }
+
+    @DeleteMapping("/{filmId}/like/{userId}")
+    public Film deleteLike(@PathVariable long filmId, @PathVariable long userId) {
+        log.info("Обработан DELETE film {} like запрос.", filmId);
+        return filmService.deleteLike(filmId, userId);
+    }
+
+    @GetMapping("/popular")
+    public List<Film> getTopFilms(@RequestParam(defaultValue = "0") int topFilmsCount) {
+        log.info("Обработан GET top {} film  запрос.", topFilmsCount);
+        return filmService.getTopFilms(topFilmsCount);
     }
 
 }

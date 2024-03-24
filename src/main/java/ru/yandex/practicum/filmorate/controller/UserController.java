@@ -9,7 +9,7 @@ import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.Optional;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -37,7 +37,7 @@ public class UserController {
         try {
             userService.updateUser(user);
             log.info("Обработан PUT user запрос.");
-        } catch (ResourceNotFoundException e){
+        } catch (ResourceNotFoundException e) {
             throw new ResourceNotFoundException(e.getMessage());
         }
         return user;
@@ -45,8 +45,38 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public User getUserById(@PathVariable long userId) {
-        log.info("Обработан GET user запрос.");
+        log.info("Обработан GET user {} запрос.", userId);
         return userService.getUserById(userId);
+    }
+
+    @DeleteMapping("/{userId}")
+    public void deleteUser(@PathVariable long userId) {
+        log.info("Обработан DELETE user {} запрос.", userId);
+        userService.deleteUser(userId);
+    }
+
+    @PutMapping("/{userId}/friends/{friendId}")
+    public User addFriend(@PathVariable long userId, @PathVariable long friendId) {
+        log.info("Обработан PUT user {} запрос.", userId);
+        return userService.addFriend(userId, friendId);
+    }
+
+    @DeleteMapping("/{userId}/friends/{friendId}")
+    public User deleteFriend(@PathVariable long userId, @PathVariable long friendId) {
+        log.info("Обработан DELETE user's friend {} запрос.", userId);
+        return userService.deleteFriend(userId, friendId);
+    }
+
+    @GetMapping("/{userId}/friends")
+    public List<User> getUserFriends(@PathVariable long userId) {
+        log.info("Обработан GET user {} friends запрос.", userId);
+        return userService.getAllFriends(userId);
+    }
+
+    @GetMapping("/{userId}/friends/common/{friendId}")
+    public List<User> getCommonFriends(@PathVariable long userId, @PathVariable long friendId) {
+        log.info("Обработан GET user {} common friends запрос.", userId);
+        return userService.getCommonFriends(userId, friendId);
     }
 
 }

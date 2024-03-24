@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class InMemoryUserStorage implements UserStorage {
-    // TODO: choose collection as storage
     private final Map<Long, User> users = new HashMap<>();
 
     private long idCounter;
@@ -20,7 +19,6 @@ public class InMemoryUserStorage implements UserStorage {
         return ++idCounter;
     }
 
-    // TODO: implement adding user to storage
     @Override
     public User addUser(User user) {
         user.setId(generateId());
@@ -31,18 +29,16 @@ public class InMemoryUserStorage implements UserStorage {
         return user;
     }
 
-    // TODO: implement deleting user from storage
     @Override
     public void deleteUser(long userId) {
-        if (users.containsKey(userId)){
+        if (users.containsKey(userId)) {
             users.remove(userId);
-            log.info("Пользователь {} c id={} успешно удалён", users.get(userId).getLogin(), userId);
+            log.info("Пользователь c id={} успешно удалён", userId);
         } else {
             throw new ResourceNotFoundException(String.format("Пользователь с id=%d не найден", userId));
         }
     }
 
-    // TODO: implement updating a user in storage method
     @Override
     public User updateUser(User user) {
         if (users.containsKey(user.getId())) {
@@ -55,7 +51,6 @@ public class InMemoryUserStorage implements UserStorage {
         return user;
     }
 
-    // TODO: method to get list of users
     public List<User> getAllUsers() {
         return users.values().stream().collect(Collectors.toList());
     }

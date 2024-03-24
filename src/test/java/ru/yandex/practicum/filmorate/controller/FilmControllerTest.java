@@ -117,6 +117,6 @@ class FilmControllerTest {
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> controller.putFilm(film));
 
-        assertEquals("Фильм с таким id не найден", exception.getMessage());
+        assertEquals(String.format("Фильм с id=%d не найден.", film.getId()), exception.getMessage());
     }
 }

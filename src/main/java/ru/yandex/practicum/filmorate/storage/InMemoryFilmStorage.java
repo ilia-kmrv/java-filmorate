@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +33,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public void deleteFilm(long filmId) {
-        if (films.containsKey(filmId)){
+        if (films.containsKey(filmId)) {
             films.remove(filmId);
             log.info("Фильм c id={} успешно удалён", filmId);
         } else {
@@ -54,7 +53,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     public List<Film> getAllFilms() {
-       return films.values().stream().collect(Collectors.toList());
+        return films.values().stream().collect(Collectors.toList());
     }
 
     @Override

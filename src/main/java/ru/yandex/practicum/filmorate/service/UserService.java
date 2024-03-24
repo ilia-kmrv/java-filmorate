@@ -7,8 +7,8 @@ import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -39,23 +39,33 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Пользователь с id=%d не найден", id)));
     }
 
-    public void addFriend(Long userId, Long friendId) {
+    public User addFriend(Long userId, Long friendId) {
         User user = getUserById(userId);
         User friend = getUserById(friendId);
         user.getFriends().add(friendId);
         friend.getFriends().add(userId);
         log.info("Пользователю id={} добавлен в друзья id={}", userId, friendId);
+        return user;
     }
 
-    public void deleteFriend(Long userId, Long friendId) {
-            getUserById(userId).getFriends().remove(friendId);
-            getUserById(friendId).getFriends().remove(userId);
-            log.info("Пользователю id={} удалён из друзей id={}", userId, friendId);
+    public User deleteFriend(Long userId, Long friendId) {
+        getUserById(userId).getFriends().remove(friendId);
+        getUserById(friendId).getFriends().remove(userId);
+        log.info("Пользователю id={} удалён из друзей id={}", userId, friendId);
+        return getUserById(userId);
     }
 
-    public List<Long> getAllFriends(Long userId) {
-            return getUserById(userId).getFriends().stream().collect(Collectors.toList());
+    public List<User> getAllFriends(Long userId) {
+        return getUserById(userId).getFriends().stream()
+                .map(this::getUserById)
+                .collect(Collectors.toList());
     }
 
-    // TODO: add get common friends of two users
+    // получение списка общих друзей
+    public List<User> getCommonFriends(Long userId, Long friendId) {
+        HashSet<Long> commonFriendsIds = new HashSet<>(getUserById(userId).getFriends());
+
+        commonFriendsIds.retainAll(getUserById(friendId).getFriends());
+        return commonFriendsIds.stream().map(this::getUserById).collect(Collectors.toList());
+    }
 }

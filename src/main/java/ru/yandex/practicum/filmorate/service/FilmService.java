@@ -7,10 +7,8 @@ import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -40,15 +38,15 @@ public class FilmService {
 
     public Film addLike(Long filmId, Long userId) {
         Film film = getFilmById(filmId);
-            film.getLikes().add(userId);
-            log.info("Лайк фильму c id={} от пользователя с id={} успешно добавлен.", filmId, userId);
+        film.getLikes().add(userId);
+        log.info("Лайк фильму c id={} от пользователя с id={} успешно добавлен.", filmId, userId);
         return film;
     }
 
     public Film deleteLike(Long filmId, Long userId) {
         Film film = getFilmById(filmId);
-            film.getLikes().remove(userId);
-            log.info("Лайк фильму c id={} от пользователя с id={} успешно удалён.", filmId, userId);
+        film.getLikes().remove(userId);
+        log.info("Лайк фильму c id={} от пользователя с id={} успешно удалён.", filmId, userId);
         return film;
     }
 

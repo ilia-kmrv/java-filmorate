@@ -120,7 +120,7 @@ class UserControllerTest {
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> controller.putUser(user));
 
-        assertEquals("Пользователь с таким id не найден", exception.getMessage());
+        assertEquals(String.format("Пользователь с id=%d не найден", user.getId()), exception.getMessage());
     }
 
 }
