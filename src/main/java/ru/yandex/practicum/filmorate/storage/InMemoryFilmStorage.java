@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.HashMap;
@@ -33,22 +32,14 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public void deleteFilm(long filmId) {
-        if (films.containsKey(filmId)) {
-            films.remove(filmId);
-            log.info("Фильм c id={} успешно удалён", filmId);
-        } else {
-            throw new ResourceNotFoundException(String.format("Фильм с id=%d не найден.", filmId));
-        }
+        films.remove(filmId);
+        log.info("Фильм c id={} успешно удалён", filmId);
     }
 
     @Override
     public Film updateFilm(Film film) {
-        if (films.containsKey(film.getId())) {
-            films.put(film.getId(), film);
-            log.info("Фильм {} с id={} успешно обновлён", film.getName(), film.getId());
-        } else {
-            throw new ResourceNotFoundException(String.format("Фильм с id=%d не найден.", film.getId()));
-        }
+        films.put(film.getId(), film);
+        log.info("Фильм {} с id={} успешно обновлён", film.getName(), film.getId());
         return film;
     }
 

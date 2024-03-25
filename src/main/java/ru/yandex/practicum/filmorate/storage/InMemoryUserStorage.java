@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
@@ -31,23 +30,15 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void deleteUser(long userId) {
-        if (users.containsKey(userId)) {
-            users.remove(userId);
-            log.info("Пользователь c id={} успешно удалён", userId);
-        } else {
-            throw new ResourceNotFoundException(String.format("Пользователь с id=%d не найден", userId));
-        }
+        users.remove(userId);
+        log.info("Пользователь c id={} успешно удалён", userId);
     }
 
     @Override
     public User updateUser(User user) {
-        if (users.containsKey(user.getId())) {
-            setUserNameToLoginIfNotProvided(user);
-            users.put(user.getId(), user);
-            log.info("Пользователь {} с id={} успешно обновлён", user.getLogin(), user.getId());
-        } else {
-            throw new ResourceNotFoundException(String.format("Пользователь с id=%d не найден", user.getId()));
-        }
+        setUserNameToLoginIfNotProvided(user);
+        users.put(user.getId(), user);
+        log.info("Пользователь {} с id={} успешно обновлён", user.getLogin(), user.getId());
         return user;
     }
 

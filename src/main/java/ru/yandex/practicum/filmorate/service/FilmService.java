@@ -19,16 +19,17 @@ public class FilmService {
     private final FilmStorage filmStorage;
     static final int DEFAULT_TOP_COUNT = 10;
 
-    // TODO: add comments
     public Film addFilm(Film film) {
         return filmStorage.addFilm(film);
     }
 
     public void deleteFilm(long filmId) {
+        getFilmById(filmId);
         filmStorage.deleteFilm(filmId);
     }
 
     public Film updateFilm(Film film) {
+        getFilmById(film.getId());
         return filmStorage.updateFilm(film);
     }
 
@@ -60,6 +61,7 @@ public class FilmService {
         return list;
     }
 
+    // получение фильма по id. бросает исключение если в хранилище нет фильма с таким id
     public Film getFilmById(long id) {
         return filmStorage.getFilmById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Фильм с id=%d не найден", id)));

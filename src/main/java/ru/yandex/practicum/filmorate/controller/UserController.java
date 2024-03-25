@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -27,20 +26,14 @@ public class UserController {
 
     @PostMapping
     public User postUser(@Valid @RequestBody User user) {
-        userService.addUser(user);
         log.info("Обработан POST user запрос.");
-        return user;
+        return userService.addUser(user);
     }
 
     @PutMapping
     public User putUser(@Valid @RequestBody User user) {
-        try {
-            userService.updateUser(user);
-            log.info("Обработан PUT user запрос.");
-        } catch (ResourceNotFoundException e) {
-            throw new ResourceNotFoundException(e.getMessage());
-        }
-        return user;
+        log.info("Обработан PUT user запрос.");
+        return userService.updateUser(user);
     }
 
     @GetMapping("/{userId}")

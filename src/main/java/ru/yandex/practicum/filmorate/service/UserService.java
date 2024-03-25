@@ -23,10 +23,12 @@ public class UserService {
     }
 
     public void deleteUser(long userId) {
+        getUserById(userId);
         userStorage.deleteUser(userId);
     }
 
     public User updateUser(User user) {
+        getUserById(user.getId());
         return userStorage.updateUser(user);
     }
 
@@ -34,6 +36,7 @@ public class UserService {
         return userStorage.getAllUsers();
     }
 
+    // получение пользователя по id. бросает исключение если в хранилище нет фильма с таким id
     public User getUserById(Long id) {
         return userStorage.getUserById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Пользователь с id=%d не найден", id)));
