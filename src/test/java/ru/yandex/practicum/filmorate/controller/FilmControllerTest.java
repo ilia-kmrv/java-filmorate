@@ -5,6 +5,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -19,10 +22,14 @@ class FilmControllerTest {
     FilmController controller;
     Film film;
     Validator validator;
+    FilmService filmService;
+    FilmStorage filmStorage;
 
     @BeforeEach
     void setUp() {
-        controller = new FilmController();
+        filmStorage = new InMemoryFilmStorage();
+        filmService = new FilmService(filmStorage);
+        controller = new FilmController(filmService);
 
         film = Film.builder()
                 .name("Test film")
@@ -91,7 +98,6 @@ class FilmControllerTest {
         assertFalse(violations.isEmpty(), "Добавлена дата релиза до 28.12.1895");
     }
 
-    //TODO: check duration is positive
     @Test
     @DisplayName("Проверка продолжительности - только положительное число")
     void postFilmWithNegativeDurationShouldFailValidation() {
@@ -111,6 +117,6 @@ class FilmControllerTest {
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> controller.putFilm(film));
 
-        assertEquals("Фильм с таким id не найден", exception.getMessage());
+        assertEquals(String.format("Фильм с id=%d не найден", film.getId()), exception.getMessage());
     }
 }

@@ -6,6 +6,8 @@ import ru.yandex.practicum.filmorate.validator.AfterDate;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Film.
@@ -18,6 +20,8 @@ public class Film {
     public static final String FIRST_FILM_DATE = "1895-12-28";
 
     private long id;
+
+    private final Set<Long> likes = new HashSet<>();
 
     @NotBlank(message = "Название должно содержать как минимум один непустой символ и не может быть null")
     private String name;

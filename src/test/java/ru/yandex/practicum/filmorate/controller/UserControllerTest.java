@@ -5,6 +5,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -19,10 +22,14 @@ class UserControllerTest {
     UserController controller;
     User user;
     Validator validator;
+    UserService userService;
+    UserStorage userStorage;
 
     @BeforeEach
     void setUp() {
-        controller = new UserController();
+        userStorage = new InMemoryUserStorage();
+        userService = new UserService(userStorage);
+        controller = new UserController(userService);
 
         user = User.builder()
                 .name("Leonard")
@@ -113,7 +120,7 @@ class UserControllerTest {
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> controller.putUser(user));
 
-        assertEquals("Пользователь с таким id не найден", exception.getMessage());
+        assertEquals(String.format("Пользователь с id=%d не найден", user.getId()), exception.getMessage());
     }
 
 }
