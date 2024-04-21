@@ -50,7 +50,7 @@ public class UserController {
 
     @PutMapping("/{userId}/friends/{friendId}")
     public User addFriend(@PathVariable long userId, @PathVariable long friendId) {
-        log.info("Обработан PUT user {} запрос.", userId);
+        log.info("Обработан PUT user {} friends запрос.", userId);
         return userService.addFriend(userId, friendId);
     }
 

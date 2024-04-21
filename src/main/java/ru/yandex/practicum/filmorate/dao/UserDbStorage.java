@@ -23,7 +23,7 @@ public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public User addUser(User user) {
+    public User create(User user) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("users")
                 .usingGeneratedKeyColumns("id");
@@ -34,13 +34,13 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Optional<User> getUserById(Long id) {
+    public Optional<User> get(Long id) {
         String sqlQuery = "SELECT id, email, login, name, birthday FROM users WHERE id = ?";
-        return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> mapRowToUser(rs, rowNum), id).stream().findFirst();
+        return jdbcTemplate.query(sqlQuery, this::mapRowToUser, id).stream().findFirst();
     }
 
     @Override
-    public User updateUser(User user) {
+    public User update(User user) {
         String sqlQuery = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?";
         jdbcTemplate.update(sqlQuery,
                 user.getEmail(),
@@ -52,24 +52,36 @@ public class UserDbStorage implements UserStorage {
         return user;
     }
 
-    @Override
-    public boolean deleteUser(long userId) {
+    public boolean delete(Long userId) {
         String sqlQuery = "DELETE FROM users WHERE id = ?";
         return jdbcTemplate.update(sqlQuery, userId) > 0;
     }
 
     @Override
-    public List<User> getAllUsers() {
+    public List<User> getAll() {
         String sqlQuery = "SELECT id, email, login, name, birthday FROM users";
         return jdbcTemplate.query(sqlQuery, this::mapRowToUser);
     }
 
-    public User addFriend(Long userId, Long friendId) {
-        String sqlQuery = "INSERT INTO friendship (user_id, friend_id, status)" +
-                "VALUES (?, ?, ?)" +
-                "ON CONFLICT DO NOTHING";
-        jdbcTemplate.update(sqlQuery, userId, friendId, true);
+    public User addFriend(User user, User friend) {
+        String sqlQuery = "INSERT INTO friendship (first_user_id, second_user_id, status)" +
+                "VALUES (?, ?, ?)";
+        jdbcTemplate.update(sqlQuery, user.getId(), friend.getId(), true);
         return null;
+    }
+
+    @Override
+    public User deleteFriend(User user, User friend) {
+        String sqlQuery = "DELETE FROM friendship WHERE first_user_id = ? AND second_user_id = ?";
+        jdbcTemplate.update(sqlQuery, user.getId(), friend.getId());
+        return user;
+    }
+
+    @Override
+    public List<User> getAllFriends(User user) {
+        String sqlQuery = "SELECT u.* FROM friendship AS f " +
+                "JOIN users AS u ON u.id = f.second_user_id WHERE f.first_user_id = ?";
+        return jdbcTemplate.query(sqlQuery, this::mapRowToUser, user.getId());
     }
 
     private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {

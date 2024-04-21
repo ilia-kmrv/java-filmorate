@@ -23,56 +23,59 @@ public class UserService {
 
     public User addUser(User user) {
         setUserNameToLoginIfNotProvided(user);
-        return userStorage.addUser(user);
+        return userStorage.create(user);
     }
 
     // получение пользователя по id. бросает исключение если в хранилище нет пользователя с таким id
     public User getUserById(Long id) {
-        return userStorage.getUserById(id)
+        return userStorage.get(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Пользователь с id=%d не найден", id)));
     }
 
     public User updateUser(User user) {
         getUserById(user.getId());
         setUserNameToLoginIfNotProvided(user);
-        return userStorage.updateUser(user);
+        return userStorage.update(user);
     }
 
     public void deleteUser(long userId) {
         getUserById(userId);
-        userStorage.deleteUser(userId);
+        userStorage.delete(userId);
     }
 
     public List<User> getAllUsers() {
-        return userStorage.getAllUsers();
+        return (List<User>) userStorage.getAll();
     }
 
     public User addFriend(Long userId, Long friendId) {
         User user = getUserById(userId);
         User friend = getUserById(friendId);
+        userStorage.addFriend(user, friend);
         log.info("Пользователю id={} добавлен в друзья id={}", userId, friendId);
         return user;
     }
 
     public User deleteFriend(Long userId, Long friendId) {
-        getUserById(userId).getFriends().remove(friendId);
-        getUserById(friendId).getFriends().remove(userId);
+        User user = getUserById(userId);
+        User friend = getUserById(friendId);
+        userStorage.deleteFriend(user, friend);
         log.info("Пользователю id={} удалён из друзей id={}", userId, friendId);
         return getUserById(userId);
     }
 
     public List<User> getAllFriends(Long userId) {
-        return getUserById(userId).getFriends().stream()
-                .map(this::getUserById)
-                .collect(Collectors.toList());
+        User user = getUserById((userId));
+        return userStorage.getAllFriends(user);
     }
 
     // получение списка общих друзей
     public List<User> getCommonFriends(Long userId, Long friendId) {
-        HashSet<Long> commonFriendsIds = new HashSet<>(getUserById(userId).getFriends());
-
-        commonFriendsIds.retainAll(getUserById(friendId).getFriends());
-        return commonFriendsIds.stream().map(this::getUserById).collect(Collectors.toList());
+        User user = getUserById(userId);
+        User friend = getUserById(friendId);
+        List<User> userFriends = userStorage.getAllFriends(user);
+        List<User> friendFriends = userStorage.getAllFriends(friend);
+        userFriends.retainAll(friendFriends);
+        return userFriends;
     }
 
     // если явно не указано имя пользователя присваивает значения логина

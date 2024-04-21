@@ -19,7 +19,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User addUser(User user) {
+    public User create(User user) {
         user.setId(generateId());
         users.put(user.getId(), user);
         log.info("Пользователь {} c id={} успешно добавлен", user.getLogin(), user.getId());
@@ -27,27 +27,41 @@ public class InMemoryUserStorage implements UserStorage {
         return user;
     }
 
-    @Override
-    public boolean deleteUser(long userId) {
+    public boolean delete(Long userId) {
         users.remove(userId);
         log.info("Пользователь c id={} успешно удалён", userId);
         return false;
     }
 
     @Override
-    public User updateUser(User user) {
+    public User update(User user) {
         users.put(user.getId(), user);
         log.info("Пользователь {} с id={} успешно обновлён", user.getLogin(), user.getId());
         return user;
     }
 
-    public List<User> getAllUsers() {
+    public List<User> getAll() {
         return users.values().stream().collect(Collectors.toList());
     }
 
     @Override
-    public Optional<User> getUserById(Long id) {
+    public Optional<User> get(Long id) {
         return Optional.ofNullable(users.get(id));
     }
 
+    @Override
+    public User addFriend(User user, User friend) {
+
+        return null;
+    }
+
+    @Override
+    public User deleteFriend(User user, User friendId) {
+        return null;
+    }
+
+    @Override
+    public List<User> getAllFriends(User user) {
+        return null;
+    }
 }
