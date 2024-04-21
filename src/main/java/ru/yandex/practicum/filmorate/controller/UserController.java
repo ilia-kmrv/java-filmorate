@@ -18,22 +18,10 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping
-    public Collection<User> getAllUsers() {
-        log.info("Обработан GET users запрос");
-        return userService.getAllUsers();
-    }
-
     @PostMapping
     public User postUser(@Valid @RequestBody User user) {
         log.info("Обработан POST user запрос.");
         return userService.addUser(user);
-    }
-
-    @PutMapping
-    public User putUser(@Valid @RequestBody User user) {
-        log.info("Обработан PUT user запрос.");
-        return userService.updateUser(user);
     }
 
     @GetMapping("/{userId}")
@@ -42,10 +30,22 @@ public class UserController {
         return userService.getUserById(userId);
     }
 
+    @PutMapping
+    public User putUser(@Valid @RequestBody User user) {
+        log.info("Обработан PUT user запрос.");
+        return userService.updateUser(user);
+    }
+
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable long userId) {
         log.info("Обработан DELETE user {} запрос.", userId);
         userService.deleteUser(userId);
+    }
+
+    @GetMapping
+    public Collection<User> getAllUsers() {
+        log.info("Обработан GET users запрос");
+        return userService.getAllUsers();
     }
 
     @PutMapping("/{userId}/friends/{friendId}")
