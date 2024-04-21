@@ -2,6 +2,8 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -16,10 +18,24 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
 
+    @Qualifier("UserDbStorage")
     private final UserStorage userStorage;
 
     public User addUser(User user) {
+        setUserNameToLoginIfNotProvided(user);
         return userStorage.addUser(user);
+    }
+
+    // получение пользователя по id. бросает исключение если в хранилище нет пользователя с таким id
+    public User getUserById(Long id) {
+        return userStorage.getUserById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Пользователь с id=%d не найден", id)));
+    }
+
+    public User updateUser(User user) {
+        getUserById(user.getId());
+        setUserNameToLoginIfNotProvided(user);
+        return userStorage.updateUser(user);
     }
 
     public void deleteUser(long userId) {
@@ -27,26 +43,13 @@ public class UserService {
         userStorage.deleteUser(userId);
     }
 
-    public User updateUser(User user) {
-        getUserById(user.getId());
-        return userStorage.updateUser(user);
-    }
-
     public List<User> getAllUsers() {
         return userStorage.getAllUsers();
-    }
-
-    // получение пользователя по id. бросает исключение если в хранилище нет фильма с таким id
-    public User getUserById(Long id) {
-        return userStorage.getUserById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("Пользователь с id=%d не найден", id)));
     }
 
     public User addFriend(Long userId, Long friendId) {
         User user = getUserById(userId);
         User friend = getUserById(friendId);
-        user.getFriends().add(friendId);
-        friend.getFriends().add(userId);
         log.info("Пользователю id={} добавлен в друзья id={}", userId, friendId);
         return user;
     }
@@ -70,5 +73,13 @@ public class UserService {
 
         commonFriendsIds.retainAll(getUserById(friendId).getFriends());
         return commonFriendsIds.stream().map(this::getUserById).collect(Collectors.toList());
+    }
+
+    // если явно не указано имя пользователя присваивает значения логина
+    private void setUserNameToLoginIfNotProvided(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+            log.info("В имя пользователя с id={} записан логин {}", user.getId(), user.getLogin());
+        }
     }
 }

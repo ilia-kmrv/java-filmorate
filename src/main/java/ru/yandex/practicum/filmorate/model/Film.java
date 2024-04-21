@@ -37,4 +37,6 @@ public class Film {
     @Positive
     private int duration;
 
+    private final HashSet<Genre> genres = new HashSet<>();
+    private MpaRating mpaRating;
 }

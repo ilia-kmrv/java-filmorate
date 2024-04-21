@@ -11,7 +11,7 @@ public interface UserStorage {
     User addUser(User user);
 
     // удаление пользователя по id
-    void deleteUser(long userId);
+    boolean deleteUser(long userId);
 
     // обновление пользователя
     User updateUser(User user);
@@ -21,4 +21,5 @@ public interface UserStorage {
 
     // получение пользователя по id
     Optional<User> getUserById(Long id);
+
 }
