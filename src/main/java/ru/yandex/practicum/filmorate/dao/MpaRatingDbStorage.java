@@ -55,6 +55,7 @@ public class MpaRatingDbStorage implements MpaRatingStorage {
 
     @Override
     public Collection<MpaRating> getAll() {
+        log.info("Получение всех MPA рейтингов");
         String sqlQuery = "SELECT * FROM mpa_ratings";
         return jdbcTemplate.query(sqlQuery, this::mapRowToMpaRating);
     }

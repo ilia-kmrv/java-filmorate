@@ -18,7 +18,7 @@ public class MpaRatingController {
     private final MpaRatingService mpaRatingService;
 
     @PostMapping
-    public MpaRating postUser(@Valid @RequestBody MpaRating mpaRating) {
+    public MpaRating postMpaRating(@Valid @RequestBody MpaRating mpaRating) {
         log.info("Обработан POST MpaRating запрос.");
         return mpaRatingService.addMpaRating(mpaRating);
     }
@@ -35,7 +35,7 @@ public class MpaRatingController {
         return mpaRatingService.updateMpaRating(mpaRating);
     }
 
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/{mpaRatingId}")
     public void deleteMpaRating(@PathVariable long mpaRatingId) {
         log.info("Обработан DELETE MpaRating {} запрос.", mpaRatingId);
         mpaRatingService.deleteMpaRating(mpaRatingId);
