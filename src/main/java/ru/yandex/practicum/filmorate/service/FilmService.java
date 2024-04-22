@@ -21,14 +21,12 @@ public class FilmService {
 
     @Qualifier("FilmDbStorage")
     private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
-    static final int DEFAULT_TOP_COUNT = 10;
+    public static final int DEFAULT_TOP_COUNT = 10;
 
     public Film addFilm(Film film) {
         return filmStorage.create(film);
     }
 
-    // получение фильма по id. бросает исключение если в хранилище нет фильма с таким id
     public Film getFilmById(long id) {
         return filmStorage.get(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Фильм с id=%d не найден", id)));
@@ -57,18 +55,13 @@ public class FilmService {
 
     public Film deleteLike(Long filmId, Long userId) {
         Film film = getFilmById(filmId);
-        film.getLikes().remove(userId);
+        filmStorage.deleteLike(filmId, userId);
         log.info("Лайк фильму c id={} от пользователя с id={} успешно удалён.", filmId, userId);
         return film;
     }
 
     public List<Film> getTopFilms(int filmsCount) {
-
-        List<Film> list = filmStorage.getAll().stream()
-                .sorted(Comparator.comparingInt((Film f) -> f.getLikes().size()).reversed())
-                .limit(filmsCount > 0 ? filmsCount : DEFAULT_TOP_COUNT)
-                .collect(Collectors.toList());
-
-        return list;
+        log.info("Возвращаем топ {} самых популярных фильмов", filmsCount);
+        return filmStorage.getTopFilms(filmsCount);
     }
 }

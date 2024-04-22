@@ -6,6 +6,9 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static ru.yandex.practicum.filmorate.service.FilmService.DEFAULT_TOP_COUNT;
 
 @Slf4j
 @Component
@@ -52,7 +55,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void addLike(Long film, Long user) {
+    public void addLike(Long filmId, Long userId) {
 
     }
 
@@ -63,6 +66,10 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getTopFilms(int count) {
-        return null;
+        List<Film> list = getAll().stream()
+                .sorted(Comparator.comparingInt((Film f) -> f.getLikes().size()).reversed())
+                .limit(count > 0 ? count : DEFAULT_TOP_COUNT)
+                .collect(Collectors.toList());
+        return list;
     }
 }

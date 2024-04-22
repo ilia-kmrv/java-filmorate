@@ -18,7 +18,8 @@ public class Film {
 
     private long id;
 
-    private final Set<Long> likes = new HashSet<>();
+    @Builder.Default
+    private Set<Long> likes = new HashSet<>();
 
     @NotBlank(message = "Название должно содержать как минимум один непустой символ и не может быть null")
     private String name;

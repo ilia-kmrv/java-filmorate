@@ -18,6 +18,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
+import static ru.yandex.practicum.filmorate.service.FilmService.DEFAULT_TOP_COUNT;
+
 @Repository
 @Qualifier("FilmDbStorage")
 @RequiredArgsConstructor
@@ -101,17 +103,32 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void addLike(Long filmId, Long userId) {
-
+        String sqlQuery = "INSERT INTO likes (film_id, user_id) VALUES (?, ?)";
+        jdbcTemplate.update(sqlQuery, filmId, userId);
     }
 
     @Override
     public void deleteLike(Long filmId, Long userId) {
-
+        String sqlQuery = "DELETE FROM likes WHERE film_id = ? AND user_id = ?";
+        jdbcTemplate.update(sqlQuery, filmId, userId);
     }
 
     @Override
     public List<Film> getTopFilms(int count) {
-        return null;
+        String sqlQuery =
+                "SELECT f.*, " +
+                        "mpa.id, mpa.name AS mpa_name, " +
+                        "STRING_AGG(g.id, ', ') AS genre_id, " +
+                        "STRING_AGG(g.name, ', ') AS genre_name " +
+                        "FROM films AS f " +
+                        "LEFT JOIN mpa_ratings AS mpa ON f.mpa_rating = mpa.id " +
+                        "LEFT JOIN film_genre AS fg ON f.id = fg.film_id " +
+                        "LEFT JOIN genres AS g ON fg.genre_id = g.id " +
+                        "LEFT JOIN likes AS l ON f.id = l.film_id " +
+                        "GROUP BY f.id " +
+                        "ORDER BY COUNT(l.film_id) DESC " +
+                        "LIMIT ?";
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count > 0 ? count : DEFAULT_TOP_COUNT);
     }
 
 
@@ -160,6 +177,5 @@ public class FilmDbStorage implements FilmStorage {
                 .mpa(new MpaRating(resultSet.getInt("mpa_rating"), resultSet.getString("mpa_name")))
                 .genres(genres)
                 .build();
-
     }
 }
