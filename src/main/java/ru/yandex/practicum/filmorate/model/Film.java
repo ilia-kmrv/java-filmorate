@@ -1,20 +1,17 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import ru.yandex.practicum.filmorate.validator.AfterDate;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Data
 @Builder
 @AllArgsConstructor
+@Getter
+@Setter
 public class Film {
 
     public static final String FIRST_FILM_DATE = "1895-12-28";
@@ -39,7 +36,8 @@ public class Film {
 
     @NotNull
     private MpaRating mpa;
-    private final HashSet<Genre> genres = new HashSet<>();
+    @Builder.Default
+    private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
 
     public Map<String,Object> toMap() {
         Map<String, Object> values = new HashMap<>();
@@ -48,6 +46,7 @@ public class Film {
         values.put("release_date", releaseDate);
         values.put("duration", duration);
         values.put("mpa_rating", mpa.getId());
+        values.put("genres", genres);
         return values;
     }
 }

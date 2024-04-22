@@ -4,13 +4,12 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface FilmStorage extends Storage<Film> {
 
-    void addLike(Film film, User user);
+    void addLike(Long filmId, Long userId);
 
-    void deleteLike(Film film, User user);
+    void deleteLike(Long filmId, Long userId);
 
     List<Film> getTopFilms(int count);
 }
