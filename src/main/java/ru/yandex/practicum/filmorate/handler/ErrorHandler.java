@@ -11,8 +11,6 @@ import ru.yandex.practicum.filmorate.exception.ErrorResponse;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 
 import javax.validation.ConstraintViolationException;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 
 @Slf4j
 @RestControllerAdvice

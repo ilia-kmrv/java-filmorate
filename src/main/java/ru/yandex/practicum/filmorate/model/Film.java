@@ -27,7 +27,6 @@ public class Film {
     @Size(max = 200, message = "Описание может быть длиной до 200 символов")
     private String description;
 
-
     @NotNull
     @AfterDate(FIRST_FILM_DATE)
     private LocalDate releaseDate;
@@ -40,7 +39,7 @@ public class Film {
     @Builder.Default
     private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
 
-    public Map<String,Object> toMap() {
+    public Map<String, Object> toMap() {
         Map<String, Object> values = new HashMap<>();
         values.put("name", name);
         values.put("description", description);

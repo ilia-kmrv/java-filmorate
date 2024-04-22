@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MpaRating;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.sql.ResultSet;
@@ -133,7 +132,7 @@ public class FilmDbStorage implements FilmStorage {
 
 
     private void saveFilmGenres(Film film) {
-        if (film.getGenres() != null ) {
+        if (film.getGenres() != null) {
             jdbcTemplate.update("DELETE FROM film_genre WHERE film_id = ?", film.getId());
             jdbcTemplate.batchUpdate("INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)",
                     film.getGenres(),

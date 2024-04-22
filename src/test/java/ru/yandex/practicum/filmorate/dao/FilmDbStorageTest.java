@@ -115,15 +115,15 @@ class FilmDbStorageTest {
 
     @Test
     void testDeleteFilm() {
-       filmStorage.create(firstFilm);
-       filmStorage.create(secondFilm);
+        filmStorage.create(firstFilm);
+        filmStorage.create(secondFilm);
 
-       assertEquals(2, filmStorage.getAll().size());
+        assertEquals(2, filmStorage.getAll().size());
 
-       filmStorage.delete(firstFilm.getId());
+        filmStorage.delete(firstFilm.getId());
 
-       assertEquals(1, filmStorage.getAll().size());
-       assertTrue(filmStorage.getAll().contains(secondFilm));
+        assertEquals(1, filmStorage.getAll().size());
+        assertTrue(filmStorage.getAll().contains(secondFilm));
     }
 
     @Test
