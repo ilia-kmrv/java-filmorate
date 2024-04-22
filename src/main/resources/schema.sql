@@ -27,8 +27,8 @@ CREATE TABLE IF NOT EXISTS genres (
 );
 
 CREATE TABLE IF NOT EXISTS	film_genre (
-		film_id BIGINT REFERENCES films (id),
-		genre_id INTEGER REFERENCES genres (id)
+		film_id BIGINT REFERENCES films (id) ON DELETE CASCADE,
+		genre_id INTEGER REFERENCES genres (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS	users (
@@ -40,8 +40,8 @@ CREATE TABLE IF NOT EXISTS	users (
 );
 
 CREATE TABLE IF NOT EXISTS	friendship (
-		first_user_id BIGINT REFERENCES users (id),
-		second_user_id BIGINT REFERENCES users (id),
+		first_user_id BIGINT REFERENCES users (id) ON DELETE CASCADE,
+		second_user_id BIGINT REFERENCES users (id) ON DELETE CASCADE,
 		status BOOLEAN DEFAULT FALSE
 );
 
