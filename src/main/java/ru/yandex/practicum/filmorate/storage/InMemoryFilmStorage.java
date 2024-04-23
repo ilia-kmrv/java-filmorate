@@ -25,7 +25,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film create(Film film) {
         film.setId(generateId());
         films.put(film.getId(), film);
-        log.info("Фильм {} с id={} успешно добавлен", film.getName(), film.getId());
+        log.debug("Фильм {} с id={} успешно добавлен", film.getName(), film.getId());
         return film;
     }
 
@@ -37,14 +37,14 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film update(Film film) {
         films.put(film.getId(), film);
-        log.info("Фильм {} с id={} успешно обновлён", film.getName(), film.getId());
+        log.debug("Фильм {} с id={} успешно обновлён", film.getName(), film.getId());
         return film;
     }
 
     @Override
     public boolean delete(Long filmId) {
         films.remove(filmId);
-        log.info("Фильм c id={} успешно удалён", filmId);
+        log.debug("Фильм c id={} успешно удалён", filmId);
         return true;
     }
 

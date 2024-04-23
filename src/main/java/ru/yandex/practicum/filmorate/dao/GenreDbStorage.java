@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 
 @Slf4j
@@ -21,19 +22,29 @@ public class GenreDbStorage implements GenreStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
+    public LinkedHashSet<Genre> getGenresByFilmId(Long filmId) {
+        String sql = "SELECT * FROM film_genre AS fg " +
+                "JOIN genres AS g ON fg.genre_id = g.id " +
+                "WHERE fg.film_id = ? " +
+                "GROUP BY fg.genre_id, fg.film_id, g.name";
+
+        return new LinkedHashSet<>(jdbcTemplate.query(sql, this::mapRowToGenre, filmId));
+    }
+
+    @Override
     public Genre create(Genre genre) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("genres")
                 .usingGeneratedKeyColumns("id");
         int genreGeneratedId = simpleJdbcInsert.executeAndReturnKey(genre.toMap()).intValue();
         genre.setId(genreGeneratedId);
-        log.info("Жанр {} c id={} успешно добавлен", genre.getName(), genre.getId());
+        log.debug("Жанр {} c id={} успешно добавлен", genre.getName(), genre.getId());
         return genre;
     }
 
     @Override
     public Optional<Genre> get(Long id) {
-        log.info("Получение жанра с id={}", id);
+        log.debug("Получение жанра с id={}", id);
         String sqlQuery = "SELECT * FROM genres WHERE id = ?";
         return jdbcTemplate.query(sqlQuery, this::mapRowToGenre, id).stream().findFirst();
     }
@@ -55,7 +66,7 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public Collection<Genre> getAll() {
-        log.info("Получение всех жанров");
+        log.debug("Получение всех жанров");
         String sqlQuery = "SELECT * FROM genres";
         return jdbcTemplate.query(sqlQuery, this::mapRowToGenre);
     }

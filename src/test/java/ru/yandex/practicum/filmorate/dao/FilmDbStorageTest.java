@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
@@ -19,7 +18,6 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.nio.charset.Charset;
 import java.time.LocalDate;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,13 +58,6 @@ class FilmDbStorageTest {
 
         Optional<MpaRating> mpaRatingOptional1 = mpaRatingStorage.get(1L);
         Optional<MpaRating> mpaRatingOptional2 = mpaRatingStorage.get(2L);
-        Optional<Genre> genreOptional1 = genreStorage.get(1L);
-        Optional<Genre> genreOptional2 = genreStorage.get(2L);
-
-        LinkedHashSet<Genre> genresForFirstFilm = new LinkedHashSet<>();
-        genresForFirstFilm.add(genreOptional1.get());
-        LinkedHashSet<Genre> genresForSecondFilm = new LinkedHashSet<>();
-        genresForSecondFilm.add(genreOptional2.get());
 
         firstFilm = Film.builder()
                 .name("Film 1")
@@ -74,7 +65,6 @@ class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2020, 12, 01))
                 .duration(110)
                 .mpa(mpaRatingOptional1.get())
-                .genres(genresForFirstFilm)
                 .build();
 
         secondFilm = Film.builder()
@@ -84,7 +74,6 @@ class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2020, 12, 01))
                 .duration(120)
                 .mpa(mpaRatingOptional2.get())
-                .genres(genresForSecondFilm)
                 .build();
     }
 

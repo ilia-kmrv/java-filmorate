@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
 import java.util.List;
 
@@ -17,6 +18,8 @@ public class FilmService {
 
     @Qualifier("FilmDbStorage")
     private final FilmStorage filmStorage;
+
+    private final GenreStorage genreStorage;
     public static final int DEFAULT_TOP_COUNT = 10;
 
     public Film addFilm(Film film) {
@@ -24,8 +27,10 @@ public class FilmService {
     }
 
     public Film getFilmById(long id) {
-        return filmStorage.get(id)
+        Film film = filmStorage.get(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Фильм с id=%d не найден", id)));
+
+        return film.toBuilder().genres(genreStorage.getGenresByFilmId(id)).build();
     }
 
     public Film updateFilm(Film film) {
@@ -45,19 +50,19 @@ public class FilmService {
     public Film addLike(Long filmId, Long userId) {
         Film film = getFilmById(filmId);
         filmStorage.addLike(filmId, userId);
-        log.info("Лайк фильму c id={} от пользователя с id={} успешно добавлен.", filmId, userId);
+        log.debug("Лайк фильму c id={} от пользователя с id={} успешно добавлен.", filmId, userId);
         return film;
     }
 
     public Film deleteLike(Long filmId, Long userId) {
         Film film = getFilmById(filmId);
         filmStorage.deleteLike(filmId, userId);
-        log.info("Лайк фильму c id={} от пользователя с id={} успешно удалён.", filmId, userId);
+        log.debug("Лайк фильму c id={} от пользователя с id={} успешно удалён.", filmId, userId);
         return film;
     }
 
     public List<Film> getTopFilms(int filmsCount) {
-        log.info("Возвращаем топ {} самых популярных фильмов", filmsCount);
+        log.debug("Возвращаем топ {} самых популярных фильмов", filmsCount);
         return filmStorage.getTopFilms(filmsCount);
     }
 }

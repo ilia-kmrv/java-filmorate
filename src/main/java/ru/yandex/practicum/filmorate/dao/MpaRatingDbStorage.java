@@ -27,13 +27,13 @@ public class MpaRatingDbStorage implements MpaRatingStorage {
                 .usingGeneratedKeyColumns("id");
         int mpaGeneratedId = simpleJdbcInsert.executeAndReturnKey(mpaRating.toMap()).intValue();
         mpaRating.setId(mpaGeneratedId);
-        log.info("Рейтинг MPA {} c id={} успешно добавлен", mpaRating.getName(), mpaRating.getId());
+        log.debug("Рейтинг MPA {} c id={} успешно добавлен", mpaRating.getName(), mpaRating.getId());
         return mpaRating;
     }
 
     @Override
     public Optional<MpaRating> get(Long id) {
-        log.info("Получение MPA рейтинга с id={}", id);
+        log.debug("Получение MPA рейтинга с id={}", id);
         String sqlQuery = "SELECT * FROM mpa_ratings WHERE id = ?";
         return jdbcTemplate.query(sqlQuery, this::mapRowToMpaRating, id).stream().findFirst();
     }
@@ -55,7 +55,7 @@ public class MpaRatingDbStorage implements MpaRatingStorage {
 
     @Override
     public Collection<MpaRating> getAll() {
-        log.info("Получение всех MPA рейтингов");
+        log.debug("Получение всех MPA рейтингов");
         String sqlQuery = "SELECT * FROM mpa_ratings";
         return jdbcTemplate.query(sqlQuery, this::mapRowToMpaRating);
     }

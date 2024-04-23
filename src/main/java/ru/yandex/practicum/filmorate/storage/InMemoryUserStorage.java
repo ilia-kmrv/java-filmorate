@@ -22,21 +22,21 @@ public class InMemoryUserStorage implements UserStorage {
     public User create(User user) {
         user.setId(generateId());
         users.put(user.getId(), user);
-        log.info("Пользователь {} c id={} успешно добавлен", user.getLogin(), user.getId());
+        log.debug("Пользователь {} c id={} успешно добавлен", user.getLogin(), user.getId());
 
         return user;
     }
 
     public boolean delete(Long userId) {
         users.remove(userId);
-        log.info("Пользователь c id={} успешно удалён", userId);
+        log.debug("Пользователь c id={} успешно удалён", userId);
         return false;
     }
 
     @Override
     public User update(User user) {
         users.put(user.getId(), user);
-        log.info("Пользователь {} с id={} успешно обновлён", user.getLogin(), user.getId());
+        log.debug("Пользователь {} с id={} успешно обновлён", user.getLogin(), user.getId());
         return user;
     }
 

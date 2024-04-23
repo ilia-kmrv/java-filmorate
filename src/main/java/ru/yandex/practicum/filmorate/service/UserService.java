@@ -48,7 +48,7 @@ public class UserService {
         User user = getUserById(userId);
         User friend = getUserById(friendId);
         userStorage.addFriend(user, friend);
-        log.info("Пользователю id={} добавлен в друзья id={}", userId, friendId);
+        log.debug("Пользователю id={} добавлен в друзья id={}", userId, friendId);
         return user;
     }
 
@@ -56,7 +56,7 @@ public class UserService {
         User user = getUserById(userId);
         User friend = getUserById(friendId);
         userStorage.deleteFriend(user, friend);
-        log.info("Пользователю id={} удалён из друзей id={}", userId, friendId);
+        log.debug("Пользователю id={} удалён из друзей id={}", userId, friendId);
         return getUserById(userId);
     }
 
@@ -79,7 +79,7 @@ public class UserService {
     private void setUserNameToLoginIfNotProvided(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
-            log.info("В имя пользователя с id={} записан логин {}", user.getId(), user.getLogin());
+            log.debug("В имя пользователя с id={} записан логин {}", user.getId(), user.getLogin());
         }
     }
 }

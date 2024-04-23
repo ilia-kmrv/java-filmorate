@@ -29,7 +29,7 @@ public class UserDbStorage implements UserStorage {
                 .usingGeneratedKeyColumns("id");
         long userGeneratedId = simpleJdbcInsert.executeAndReturnKey(user.toMap()).longValue();
         user.setId(userGeneratedId);
-        log.info("Пользователь {} c id={} успешно добавлен", user.getLogin(), user.getId());
+        log.debug("Пользователь {} c id={} успешно добавлен", user.getLogin(), user.getId());
         return user;
     }
 
@@ -53,8 +53,11 @@ public class UserDbStorage implements UserStorage {
     }
 
     public boolean delete(Long userId) {
-        String sqlQuery = "DELETE FROM users WHERE id = ?";
-        return jdbcTemplate.update(sqlQuery, userId) > 0;
+        if (get(userId).isPresent()) {
+            String sqlQuery = "DELETE FROM users WHERE id = ?";
+            return jdbcTemplate.update(sqlQuery, userId) > 0;
+        }
+        return false;
     }
 
     @Override
