@@ -1,23 +1,32 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.jdbc.core.JdbcTemplate;
+import ru.yandex.practicum.filmorate.dao.UserDbStorage;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.Storages;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.nio.charset.Charset;
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static ru.yandex.practicum.filmorate.model.Film.FIRST_FILM_DATE;
 
+@JdbcTest
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class UserServiceTest {
 
+    private final JdbcTemplate jdbcTemplate;
     UserStorage userStorage;
     UserService userService;
     User user;
@@ -28,7 +37,8 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        userStorage = Storages.getDefaultUserStorage();
+
+        userStorage = new UserDbStorage(jdbcTemplate);
         userService = new UserService(userStorage);
 
         user = User.builder()
@@ -60,42 +70,40 @@ class UserServiceTest {
 
     }
 
-    // TODO:
-//    @Test
-//    @DisplayName("Проверка сервиса на добавление в друзья")
-//    void addFriendShouldThrowExceptionIfIdNotFound() {
-//        userService.addFriend(user.getId(), friend.getId());
-//
-//        assertEquals(user.getFriends(), userService.getUserById(user.getId()).getFriends());
-//
-//        user.setId(Long.MAX_VALUE);
-//        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-//                () -> userService.addFriend(user.getId(), friend.getId()));
-//        assertEquals(String.format("Пользователь с id=%d не найден", Long.MAX_VALUE), exception.getMessage());
-//    }
+    @Test
+    @DisplayName("Проверка сервиса на добавление в друзья")
+    void addFriendShouldThrowExceptionIfIdNotFound() {
+        userService.addFriend(user.getId(), friend.getId());
 
-    //TODO:
-//    @Test
-//    void deleteFriendTestShouldThrowExceptionIfIdNotFound() {
-//        userService.addFriend(user.getId(), friend.getId());
-//
-//        ResourceNotFoundException e = assertThrows(ResourceNotFoundException.class,
-//                () -> userService.deleteFriend(user.getId(), Long.MAX_VALUE));
-//        assertEquals(String.format("Пользователь с id=%d не найден", Long.MAX_VALUE), e.getMessage());
-//
-//        userService.deleteFriend(user.getId(), friend.getId());
-//        assertEquals(user.getFriends().isEmpty(), friend.getFriends().isEmpty());
-//    }
+        assertEquals(List.of(friend), userService.getAllFriends(user.getId()));
 
-//    @Test
-//    @DisplayName("Проверка получения списка всех друзей")
-//    void getAllFriendsTest() {
-//        userService.addFriend(user.getId(), friend.getId());
-//
-//        List<User> expectedList = Collections.singletonList(friend);
-//
-//        assertEquals(expectedList, userService.getAllFriends(user.getId()), "Списки друзей не совпали");
-//    }
+        user.setId(Long.MAX_VALUE);
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> userService.addFriend(user.getId(), friend.getId()));
+        assertEquals(String.format("Пользователь с id=%d не найден", Long.MAX_VALUE), exception.getMessage());
+    }
+
+    @Test
+    void deleteFriendTestShouldThrowExceptionIfIdNotFound() {
+        userService.addFriend(user.getId(), friend.getId());
+
+        ResourceNotFoundException e = assertThrows(ResourceNotFoundException.class,
+                () -> userService.deleteFriend(user.getId(), Long.MAX_VALUE));
+        assertEquals(String.format("Пользователь с id=%d не найден", Long.MAX_VALUE), e.getMessage());
+
+        userService.deleteFriend(user.getId(), friend.getId());
+        assertEquals(userService.getAllFriends(user.getId()).isEmpty(), userService.getAllFriends(friend.getId()).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Проверка получения списка всех друзей")
+    void getAllFriendsTest() {
+        userService.addFriend(user.getId(), friend.getId());
+
+        List<User> expectedList = Collections.singletonList(friend);
+
+        assertEquals(expectedList, userService.getAllFriends(user.getId()), "Списки друзей не совпали");
+    }
 
     @Test
     @DisplayName("Проверка получения пользователя по id")
@@ -108,36 +116,35 @@ class UserServiceTest {
         assertTrue(String.format("Пользователь с id=%d не найден", Long.MAX_VALUE).equals(e.getMessage()));
     }
 
-    // TODO:
-//    @Test
-//    @DisplayName("Проверка получения списка общих друзей")
-//    void getCommonFriendsTestShouldReturnCorrectListOfFriends() {
-//        User thirdFriend = easyRandom.nextObject(User.class);
-//        User fourthFriend = easyRandom.nextObject(User.class);
-//        User fifthFriend = easyRandom.nextObject(User.class);
-//
-//        userService.addUser(thirdFriend);
-//        userService.addUser(fourthFriend);
-//        userService.addUser(fifthFriend);
-//
-//        // добавляем друзей первому юзеру
-//        userService.addFriend(user.getId(), thirdFriend.getId());
-//        userService.addFriend(user.getId(), fourthFriend.getId());
-//        userService.addFriend(user.getId(), friend.getId());
-//
-//        // добавляем друзей его другу
-//        userService.addFriend(friend.getId(), thirdFriend.getId());
-//        userService.addFriend(friend.getId(), fourthFriend.getId());
-//        userService.addFriend(friend.getId(), fifthFriend.getId());
-//
-//        List<User> expectedList = List.of(thirdFriend, fourthFriend);
-//
-//        userService.getCommonFriends(user.getId(), friend.getId()).stream()
-//                .map(u -> u.getId())
-//                .forEach(System.out::println);
-//
-//        assertEquals(expectedList, userService.getCommonFriends(user.getId(), friend.getId()),
-//                "Списки общих друзей не совпали");
-//
-//    }
+    @Test
+    @DisplayName("Проверка получения списка общих друзей")
+    void getCommonFriendsTestShouldReturnCorrectListOfFriends() {
+        User thirdFriend = easyRandom.nextObject(User.class);
+        User fourthFriend = easyRandom.nextObject(User.class);
+        User fifthFriend = easyRandom.nextObject(User.class);
+
+        userService.addUser(thirdFriend);
+        userService.addUser(fourthFriend);
+        userService.addUser(fifthFriend);
+
+        // добавляем друзей первому юзеру
+        userService.addFriend(user.getId(), thirdFriend.getId());
+        userService.addFriend(user.getId(), fourthFriend.getId());
+        userService.addFriend(user.getId(), friend.getId());
+
+        // добавляем друзей его другу
+        userService.addFriend(friend.getId(), thirdFriend.getId());
+        userService.addFriend(friend.getId(), fourthFriend.getId());
+        userService.addFriend(friend.getId(), fifthFriend.getId());
+
+        List<User> expectedList = List.of(thirdFriend, fourthFriend);
+
+        userService.getCommonFriends(user.getId(), friend.getId()).stream()
+                .map(u -> u.getId())
+                .forEach(System.out::println);
+
+        assertEquals(expectedList, userService.getCommonFriends(user.getId(), friend.getId()),
+                "Списки общих друзей не совпали");
+
+    }
 }
