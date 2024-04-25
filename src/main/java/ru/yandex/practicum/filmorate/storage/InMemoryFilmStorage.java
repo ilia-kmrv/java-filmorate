@@ -4,11 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static ru.yandex.practicum.filmorate.service.FilmService.DEFAULT_TOP_COUNT;
 
 @Slf4j
 @Component
@@ -23,32 +22,53 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film addFilm(Film film) {
+    public Film create(Film film) {
         film.setId(generateId());
         films.put(film.getId(), film);
-        log.info("Фильм {} с id={} успешно добавлен", film.getName(), film.getId());
+        log.debug("Фильм {} с id={} успешно добавлен", film.getName(), film.getId());
         return film;
     }
 
     @Override
-    public void deleteFilm(long filmId) {
-        films.remove(filmId);
-        log.info("Фильм c id={} успешно удалён", filmId);
-    }
-
-    @Override
-    public Film updateFilm(Film film) {
-        films.put(film.getId(), film);
-        log.info("Фильм {} с id={} успешно обновлён", film.getName(), film.getId());
-        return film;
-    }
-
-    public List<Film> getAllFilms() {
-        return films.values().stream().collect(Collectors.toList());
-    }
-
-    @Override
-    public Optional<Film> getFilmById(Long id) {
+    public Optional<Film> get(Long id) {
         return Optional.ofNullable(films.get(id));
+    }
+
+    @Override
+    public Film update(Film film) {
+        films.put(film.getId(), film);
+        log.debug("Фильм {} с id={} успешно обновлён", film.getName(), film.getId());
+        return film;
+    }
+
+    @Override
+    public boolean delete(Long filmId) {
+        films.remove(filmId);
+        log.debug("Фильм c id={} успешно удалён", filmId);
+        return true;
+    }
+
+    @Override
+    public List<Film> getAll() {
+        return new ArrayList<>(films.values());
+    }
+
+    @Override
+    public void addLike(Long filmId, Long userId) {
+
+    }
+
+    @Override
+    public void deleteLike(Long filmId, Long userId) {
+
+    }
+
+    @Override
+    public List<Film> getTopFilms(int count) {
+        List<Film> list = getAll().stream()
+                .sorted(Comparator.comparingInt((Film f) -> f.getLikes().size()).reversed())
+                .limit(count > 0 ? count : DEFAULT_TOP_COUNT)
+                .collect(Collectors.toList());
+        return list;
     }
 }

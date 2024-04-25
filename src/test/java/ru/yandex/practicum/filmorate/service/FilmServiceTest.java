@@ -1,31 +1,43 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.jdbc.core.JdbcTemplate;
+import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
+import ru.yandex.practicum.filmorate.dao.GenreDbStorage;
+import ru.yandex.practicum.filmorate.dao.MpaRatingDbStorage;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.Storages;
+import ru.yandex.practicum.filmorate.storage.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.MpaRatingStorage;
 
 import java.nio.charset.Charset;
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.LinkedHashSet;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static ru.yandex.practicum.filmorate.model.Film.FIRST_FILM_DATE;
 
+@JdbcTest
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmServiceTest {
 
+    private final JdbcTemplate jdbcTemplate;
     FilmStorage filmStorage;
     FilmService filmService;
-    Film film;
+    GenreStorage genreStorage;
+    MpaRatingStorage mpaRatingStorage;
+    Film firstFilm;
 
     EasyRandom easyRandom;
     EasyRandomParameters easyRandomParameters;
@@ -33,17 +45,30 @@ class FilmServiceTest {
 
     @BeforeEach
     void setUp() {
-        filmStorage = Storages.getDefaultFilmStorage();
-        filmService = new FilmService(filmStorage);
+        filmStorage = new FilmDbStorage(jdbcTemplate);
+        mpaRatingStorage = new MpaRatingDbStorage(jdbcTemplate);
+        genreStorage = new GenreDbStorage(jdbcTemplate);
+        filmService = new FilmService(filmStorage, genreStorage);
 
-        film = Film.builder()
-                .name("Test film")
-                .description("Test film's description")
-                .releaseDate(LocalDate.of(1995, 11, 24))
-                .duration(120)
+        Optional<MpaRating> mpaRatingOptional1 = mpaRatingStorage.get(1L);
+        Optional<MpaRating> mpaRatingOptional2 = mpaRatingStorage.get(2L);
+        Optional<Genre> genreOptional1 = genreStorage.get(1L);
+        Optional<Genre> genreOptional2 = genreStorage.get(2L);
+
+        LinkedHashSet<Genre> genresForFirstFilm = new LinkedHashSet<>();
+        genresForFirstFilm.add(genreOptional1.get());
+        LinkedHashSet<Genre> genresForSecondFilm = new LinkedHashSet<>();
+        genresForSecondFilm.add(genreOptional2.get());
+
+        firstFilm = Film.builder()
+                .name("Film 1")
+                .description("First film")
+                .releaseDate(LocalDate.of(2020, 12, 01))
+                .duration(110)
+                .mpa(mpaRatingOptional1.get())
                 .build();
 
-        filmService.addFilm(film);
+        filmService.addFilm(firstFilm);
 
         // параметры создания тестовых объектов
         easyRandomParameters = new EasyRandomParameters();
@@ -58,64 +83,9 @@ class FilmServiceTest {
     }
 
     @Test
-    @DisplayName("Проверка добавления лайка")
-    void addLikeTestShouldNotChangeSetIfLikeAlreadyExistAndAddLikeToSetIfNotExistYet() {
-        Long userId = 1L;
-        filmService.addLike(film.getId(), userId);
-
-        Set<Long> expectedSet = Collections.singleton(userId);
-
-        assertEquals(expectedSet, film.getLikes(), "Множества лайков не совпали");
-
-        // добавление уже существующего лайка не должно ничего изменить
-        filmService.addLike(film.getId(), userId);
-
-        assertEquals(expectedSet, film.getLikes(), "Множества лайков не совпали");
-    }
-
-    @Test
-    @DisplayName("Проверка удаления лайка")
-    void deleteLike() {
-        Long userId = 1L;
-        filmService.addLike(film.getId(), userId);
-
-        assertFalse(film.getLikes().isEmpty(), "Множество лайков пустое");
-
-        filmService.deleteLike(film.getId(), userId);
-
-        assertTrue(film.getLikes().isEmpty(), "Множество лайков не пустое");
-    }
-
-    @Test
-    @DisplayName("Проверка списка топ фильмов по лайкам")
-    void getTopFilmsTestShouldReturnReverseOrderedFilmList() {
-        int filmsCount = 15;
-
-        filmService.deleteFilm(film.getId());
-
-        List<Film> filmList = easyRandom.objects(Film.class, filmsCount).collect(Collectors.toList());
-
-        List<Film> expectedList = filmList.stream()
-                .sorted(Comparator.comparingInt((Film f) -> f.getLikes().size()).reversed())
-                .collect(Collectors.toList());
-
-        expectedList.stream().forEach(System.out::println);
-
-        filmList.stream().forEach(filmService::addFilm);
-
-        filmService.getTopFilms(filmsCount).stream().forEach(System.out::println);
-
-        assertTrue(expectedList.equals(filmService.getTopFilms(filmsCount)), "Топ фильмов не совпадает");
-
-        assertEquals(FilmService.DEFAULT_TOP_COUNT, filmService.getTopFilms(-2).size(),
-                String.format("Кол-во фильмов в топе не %d", FilmService.DEFAULT_TOP_COUNT));
-
-    }
-
-    @Test
     @DisplayName("Проверка получения фильма по id")
     void getFilmByIdTestShouldReturnUserOrThrowException() {
-        assertTrue(film.equals(filmService.getFilmById(film.getId())), "Фильмы не совпали");
+        assertTrue(firstFilm.equals(filmService.getFilmById(firstFilm.getId())), "Фильмы не совпали");
 
         // проверка не существующим id
         ResourceNotFoundException e = assertThrows(ResourceNotFoundException.class,

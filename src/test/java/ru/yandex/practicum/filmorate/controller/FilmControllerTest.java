@@ -1,13 +1,22 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
+import ru.yandex.practicum.filmorate.dao.GenreDbStorage;
+import ru.yandex.practicum.filmorate.dao.MpaRatingDbStorage;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.*;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -17,25 +26,35 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@JdbcTest
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmControllerTest {
 
     FilmController controller;
-    Film film;
+    Film firstFilm;
     Validator validator;
     FilmService filmService;
     FilmStorage filmStorage;
+    private final JdbcTemplate jdbcTemplate;
+    private MpaRatingStorage mpaRatingStorage;
+    private GenreStorage genreStorage;
 
     @BeforeEach
     void setUp() {
-        filmStorage = new InMemoryFilmStorage();
-        filmService = new FilmService(filmStorage);
+        filmStorage = new FilmDbStorage(jdbcTemplate);
+        mpaRatingStorage = new MpaRatingDbStorage(jdbcTemplate);
+        genreStorage = new GenreDbStorage(jdbcTemplate);
+        filmService = new FilmService(filmStorage, genreStorage);
         controller = new FilmController(filmService);
 
-        film = Film.builder()
-                .name("Test film")
-                .description("Test film's description")
-                .releaseDate(LocalDate.of(1995, 11, 24))
-                .duration(120)
+        Optional<MpaRating> mpaRatingOptional1 = mpaRatingStorage.get(1L);
+
+        firstFilm = Film.builder()
+                .name("Film 1")
+                .description("First film")
+                .releaseDate(LocalDate.of(2020, 12, 01))
+                .duration(110)
+                .mpa(mpaRatingOptional1.get())
                 .build();
 
         validator = Validation.buildDefaultValidatorFactory().getValidator();
@@ -44,21 +63,21 @@ class FilmControllerTest {
     @Test
     @DisplayName("Проверка списка")
     void getAllFilmsShouldReturnNotEmptyList() {
-        controller.postFilm(film);
+        controller.postFilm(firstFilm);
 
-        assertFalse(controller.getAllFilms().isEmpty(), "После добавления пользователя список пустой");
-        assertTrue(controller.getAllFilms().stream().anyMatch(u -> u.getId() == 1), "id не равен 1");
+        assertFalse(controller.getAllFilms().isEmpty(), "После добавления фильма список пустой");
+        assertTrue(controller.getAllFilms().stream().anyMatch(u -> u.getId() == firstFilm.getId()));
     }
 
     @Test
     @DisplayName("Проверка название фильма не пустое и не null")
     void postFilmWithBlankNameShouldFailValidation() {
-        film.setName(null);
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        firstFilm.setName(null);
+        Set<ConstraintViolation<Film>> violations = validator.validate(firstFilm);
         assertFalse(violations.isEmpty(), "Добавлено название co значением null");
 
-        film.setName(" ");
-        violations = validator.validate(film);
+        firstFilm.setName(" ");
+        violations = validator.validate(firstFilm);
         assertFalse(violations.isEmpty(), "Добавлен название c пустой строкой");
     }
 
@@ -69,54 +88,74 @@ class FilmControllerTest {
         Arrays.fill(chars, '1');
         String description = new String(chars);
 
-        film.setDescription(description);
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        firstFilm.setDescription(description);
+        Set<ConstraintViolation<Film>> violations = validator.validate(firstFilm);
         assertTrue(violations.isEmpty(), "Не добавилось описание co значением равно 200 символов");
 
         chars = new char[201];
         Arrays.fill(chars, '1');
         description = new String(chars);
 
-        film.setDescription(description);
-        violations = validator.validate(film);
+        firstFilm.setDescription(description);
+        violations = validator.validate(firstFilm);
         assertFalse(violations.isEmpty(), "Добавлено описание co значением равно 201 символов");
     }
 
     @Test
     @DisplayName("Дата рождения пользователя не сегодня и не в будущем")
     void postFilmWithReleaseDateIsBeforeFirstEverFilmDateOrNullShouldFailValidation() {
-        film.setReleaseDate(null);
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        firstFilm.setReleaseDate(null);
+        Set<ConstraintViolation<Film>> violations = validator.validate(firstFilm);
         assertFalse(violations.isEmpty(), "Добавлена дата релиза co значением null");
 
-        film.setReleaseDate(LocalDate.of(1895, 12, 28));
-        violations = validator.validate(film);
+        firstFilm.setReleaseDate(LocalDate.of(1895, 12, 28));
+        violations = validator.validate(firstFilm);
         assertTrue(violations.isEmpty(), "Не добавлена дата релиза 28.12.1895");
 
-        film.setReleaseDate(LocalDate.of(1895, 12, 27));
-        violations = validator.validate(film);
+        firstFilm.setReleaseDate(LocalDate.of(1895, 12, 27));
+        violations = validator.validate(firstFilm);
         assertFalse(violations.isEmpty(), "Добавлена дата релиза до 28.12.1895");
     }
 
     @Test
     @DisplayName("Проверка продолжительности - только положительное число")
     void postFilmWithNegativeDurationShouldFailValidation() {
-        film.setDuration(0);
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        firstFilm.setDuration(0);
+        Set<ConstraintViolation<Film>> violations = validator.validate(firstFilm);
         assertFalse(violations.isEmpty(), "Добавлена продолжительность co значением 0");
 
-        film.setDuration(-100);
-        violations = validator.validate(film);
+        firstFilm.setDuration(-100);
+        violations = validator.validate(firstFilm);
         assertFalse(violations.isEmpty(), "Добавлено продолжительность c отрицательным значением");
     }
 
     @Test
     @DisplayName("Обновление фильма c несуществующим id")
     void putFilmWithWrongIdValueShouldFail() {
-        film.setId(Long.MAX_VALUE);
+        firstFilm.setId(Long.MAX_VALUE);
 
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> controller.putFilm(film));
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> controller.putFilm(firstFilm));
 
-        assertEquals(String.format("Фильм с id=%d не найден", film.getId()), exception.getMessage());
+        assertEquals(String.format("Фильм с id=%d не найден", firstFilm.getId()), exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Проверка создания фильма с несуществующим MPA")
+    void putFilmWithWrongMPAShouldThrowException() {
+        firstFilm.setMpa(new MpaRating(Integer.MAX_VALUE, "xxx"));
+
+        DataAccessException exception = assertThrows(DataAccessException.class, () -> controller.postFilm(firstFilm));
+        assertEquals(String.format("Жанра или MPA с указанным id нет в базе", firstFilm.getId()), exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Проверка создания фильма с несуществующим жанром")
+    void putFilmWithWrongGenreShouldThrowException() {
+        LinkedHashSet<Genre> genres = new LinkedHashSet<>();
+        genres.add(new Genre(Integer.MAX_VALUE, "no_genre"));
+        firstFilm.setGenres(genres);
+
+        DataAccessException exception = assertThrows(DataAccessException.class, () -> controller.postFilm(firstFilm));
+        assertEquals(String.format("Жанра или MPA с указанным id нет в базе", firstFilm.getId()), exception.getMessage());
     }
 }

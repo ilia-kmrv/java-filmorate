@@ -2,68 +2,67 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class FilmService {
 
+    @Qualifier("FilmDbStorage")
     private final FilmStorage filmStorage;
-    static final int DEFAULT_TOP_COUNT = 10;
+
+    private final GenreStorage genreStorage;
+    public static final int DEFAULT_TOP_COUNT = 10;
 
     public Film addFilm(Film film) {
-        return filmStorage.addFilm(film);
+        return filmStorage.create(film);
     }
 
-    public void deleteFilm(long filmId) {
-        getFilmById(filmId);
-        filmStorage.deleteFilm(filmId);
+    public Film getFilmById(long id) {
+        Film film = filmStorage.get(id)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Фильм с id=%d не найден", id)));
+
+        return film.toBuilder().genres(genreStorage.getGenresByFilmId(id)).build();
     }
 
     public Film updateFilm(Film film) {
         getFilmById(film.getId());
-        return filmStorage.updateFilm(film);
+        return filmStorage.update(film);
+    }
+
+    public void deleteFilm(long filmId) {
+        getFilmById(filmId);
+        filmStorage.delete(filmId);
     }
 
     public List<Film> getAllFilms() {
-        return filmStorage.getAllFilms();
+        return (List<Film>) filmStorage.getAll();
     }
 
     public Film addLike(Long filmId, Long userId) {
         Film film = getFilmById(filmId);
-        film.getLikes().add(userId);
-        log.info("Лайк фильму c id={} от пользователя с id={} успешно добавлен.", filmId, userId);
+        filmStorage.addLike(filmId, userId);
+        log.debug("Лайк фильму c id={} от пользователя с id={} успешно добавлен.", filmId, userId);
         return film;
     }
 
     public Film deleteLike(Long filmId, Long userId) {
         Film film = getFilmById(filmId);
-        film.getLikes().remove(userId);
-        log.info("Лайк фильму c id={} от пользователя с id={} успешно удалён.", filmId, userId);
+        filmStorage.deleteLike(filmId, userId);
+        log.debug("Лайк фильму c id={} от пользователя с id={} успешно удалён.", filmId, userId);
         return film;
     }
 
     public List<Film> getTopFilms(int filmsCount) {
-
-        List<Film> list = filmStorage.getAllFilms().stream()
-                .sorted(Comparator.comparingInt((Film f) -> f.getLikes().size()).reversed())
-                .limit(filmsCount > 0 ? filmsCount : DEFAULT_TOP_COUNT)
-                .collect(Collectors.toList());
-
-        return list;
-    }
-
-    // получение фильма по id. бросает исключение если в хранилище нет фильма с таким id
-    public Film getFilmById(long id) {
-        return filmStorage.getFilmById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("Фильм с id=%d не найден", id)));
+        log.debug("Возвращаем топ {} самых популярных фильмов", filmsCount);
+        return filmStorage.getTopFilms(filmsCount);
     }
 }

@@ -19,43 +19,49 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User addUser(User user) {
+    public User create(User user) {
         user.setId(generateId());
-        setUserNameToLoginIfNotProvided(user);
         users.put(user.getId(), user);
-        log.info("Пользователь {} c id={} успешно добавлен", user.getLogin(), user.getId());
+        log.debug("Пользователь {} c id={} успешно добавлен", user.getLogin(), user.getId());
 
         return user;
     }
 
-    @Override
-    public void deleteUser(long userId) {
+    public boolean delete(Long userId) {
         users.remove(userId);
-        log.info("Пользователь c id={} успешно удалён", userId);
+        log.debug("Пользователь c id={} успешно удалён", userId);
+        return false;
     }
 
     @Override
-    public User updateUser(User user) {
-        setUserNameToLoginIfNotProvided(user);
+    public User update(User user) {
         users.put(user.getId(), user);
-        log.info("Пользователь {} с id={} успешно обновлён", user.getLogin(), user.getId());
+        log.debug("Пользователь {} с id={} успешно обновлён", user.getLogin(), user.getId());
         return user;
     }
 
-    public List<User> getAllUsers() {
+    public List<User> getAll() {
         return users.values().stream().collect(Collectors.toList());
     }
 
     @Override
-    public Optional<User> getUserById(Long id) {
+    public Optional<User> get(Long id) {
         return Optional.ofNullable(users.get(id));
     }
 
-    // если явно не указано имя пользователя присваивает значения логина
-    private void setUserNameToLoginIfNotProvided(User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-            log.info("В имя пользователя с id={} записан логин {}", user.getId(), user.getLogin());
-        }
+    @Override
+    public User addFriend(User user, User friend) {
+
+        return null;
+    }
+
+    @Override
+    public User deleteFriend(User user, User friendId) {
+        return null;
+    }
+
+    @Override
+    public List<User> getAllFriends(User user) {
+        return null;
     }
 }
