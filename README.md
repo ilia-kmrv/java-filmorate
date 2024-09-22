@@ -22,5 +22,5 @@
 
 Установка:
 ```bash
-$git clone https://github.com/ilia-kmrv/java-filmorate.git
+git clone https://github.com/ilia-kmrv/java-filmorate.git
 ``` 
