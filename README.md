@@ -20,7 +20,12 @@
 - Java 11
 - Maven 
 
-Установка:
+Установка и запуск:
 ```bash
 git clone https://github.com/ilia-kmrv/java-filmorate.git
+cd java-filmorate
+mvn clean install
+mvn spring-boot:start
 ``` 
+Postman тесты:
+[Тесты](https://github.com/ilia-kmrv/java-filmorate/postman/add-database-tests.json)
