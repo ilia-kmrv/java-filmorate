@@ -28,4 +28,4 @@ mvn clean install
 mvn spring-boot:start
 ``` 
 Postman тесты:
-[Тесты](https://github.com/ilia-kmrv/java-filmorate/postman/add-database-tests.json)
+[Тесты](https://github.com/ilia-kmrv/java-filmorate/blob/update_readme/postman/add-database-tests.json)
